@@ -70,3 +70,43 @@ class IssueSerializer(serializers.ModelSerializer):
         project = self.context["project"]
         user = self.context["request"].user
         return Issue.objects.create(project=project, author=user, **validated_data)
+
+
+class ContributorSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Contributor model.
+
+    Goal:
+    - list project contributors
+    - add a user as contributor to a project
+
+    Input:
+    - user: username of the user to add
+
+    The project is not sent in the request body:
+    it is taken from the URL and injected via serializer context.
+    """
+
+    user = serializers.SlugRelatedField(
+        slug_field="username",
+        queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Contributor
+        fields = ["id", "user", "project"]
+        read_only_fields = ["id", "project"]
+
+    def validate(self, attrs):
+        project = self.context["project"]
+        user = attrs["user"]
+
+        if Contributor.objects.filter(user=user, project=project).exists():
+            raise serializers.ValidationError(
+                {"user": "This user is already a contributor to this project."}
+            )
+        return attrs
+
+    def create(self, validated_data):
+        project = self.context["project"]
+        return Contributor.objects.create(project=project, **validated_data)
