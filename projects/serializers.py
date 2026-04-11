@@ -4,7 +4,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Project, Contributor, Issue
+from .models import Project, Contributor, Issue, Comment
 
 
 User = get_user_model()
@@ -110,3 +110,25 @@ class ContributorSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         project = self.context["project"]
         return Contributor.objects.create(project=project, **validated_data)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Comment model
+    """
+
+    author = serializers.ReadOnlyField(source="author.username")
+
+    class Meta:
+        model = Comment
+        fields = ["id", "description", "author", "issue", "created_time"]
+        read_only_fields = ["id", "author", "issue", "created_time"]
+
+    def create(self, validated_data):
+        request = self.context["request"]
+        issue = self.context["issue"]
+
+        return Comment.objects.create(
+            author=request.user,
+            issue=issue,
+            **validated_data)

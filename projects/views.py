@@ -5,8 +5,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import Project, Issue, Contributor
-from .serializers import ProjectSerializer, IssueSerializer, ContributorSerializer
+from .models import Project, Issue, Contributor, Comment
+from .serializers import ProjectSerializer, IssueSerializer, ContributorSerializer, CommentSerializer
 from .permissions import IsAuthorOrReadOnly
 
 
@@ -128,3 +128,27 @@ class ContributorViewSet(viewsets.ModelViewSet):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Only the project author can remove contributors.")
         return super().destroy(request, *args, **kwargs)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """
+    Manage comments for a specific issue
+    """
+
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+
+    def _get_issue(self):
+        return get_object_or_404(
+            Issue.objects.filter(project__contributors__user=self.request.user),
+            pk=self.kwargs["issue_id"]
+        )
+
+    def get_queryset(self):
+        issue = self._get_issue()
+        return Comment.objects.filter(issue=issue)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["issue"] = self._get_issue()
+        return context
