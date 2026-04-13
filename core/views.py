@@ -3,11 +3,18 @@
 Exposes:
 - HealthView: public health-check endpoint used to verify that the API is up.
 - ProtectedPingView: JWT-protected sanity-check endpoint to verify authentication.
+- UserProfileView: authenticated profile endpoint for GDPR-related access,
+  update, and account deletion.
 """
 
+from .models import UserProfile
+from .serializers import UserProfileSerializer
+
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+
 
 
 class HealthView(APIView):
@@ -42,3 +49,30 @@ class ProtectedPingView(APIView):
     def get(self, request):
         """Return a short JSON message along with the current username."""
         return Response({"message": "pong", "user": request.user.username})
+
+
+class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    RGPD endpoint:
+    - GET → access personal data
+    - PATCH → update (rectification)
+    - DELETE → right to be forgotten (delete account)
+    """
+
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        profile, _ = UserProfile.objects.get_or_create(
+            user=self.request.user,
+            defaults={
+                "age": 15,
+                "can_be_contacted": False,
+                "can_data_be_shared": False,
+            },
+        )
+        return profile
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        user.delete()
