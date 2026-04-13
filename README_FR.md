@@ -92,7 +92,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 ## Permissions
 
-- Tous les endpoints API nécessitent une authentification
+- Tous les endpoints API nécessitent une authentification (sauf /health)
 - Un projet est visible uniquement par ses contributeurs
 - Un contributeur peut consulter les ressources du projet
 - Seul l’auteur d’un Project, Issue ou Comment peut modifier ou supprimer
@@ -142,16 +142,18 @@ L’API suit le modèle AAA :
 
 ## Structure du projet
 
+```
 config/         # configuration Django et urls
 core/           # health, ping, profil RGPD
 projects/       # logique métier
+```
 
 ## Tests
 
 L’API a été testée avec :
 
-- Postman (outil principal avec authentification JWT et environnements)
-- des fichiers de tests Django (`tests.py`) pour une validation automatisée minimale
+- Postman (tests principaux avec JWT et environnements)
+- Django test files (tests.py) pour validation automatisée minimale
 
 Postman a permis de simuler des interactions réelles (authentification, permissions, opérations CRUD), tandis que les tests Django assurent une vérification de base du comportement de l’application.
 

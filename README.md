@@ -92,7 +92,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 ## Permissions
 
-- All API endpoints require authentication by default
+- All API endpoints require authentication by default (except /health)
 - A project is visible only to its contributors
 - A contributor can read project-related resources
 - Only the author of a Project, Issue, or Comment can update or delete it
@@ -142,9 +142,11 @@ The API follows the AAA model:
 
 ## Project Structure
 
+```
 config/         # project settings and root urls
 core/           # health, ping, GDPR profile
 projects/       # business logic: projects, contributors, issues, comments
+```
 
 ## Testing
 
