@@ -1,16 +1,18 @@
-"""URL patterns for the core app.
+"""URL patterns for core user-related endpoints.
 
 This module exposes:
-- /health/         -> public health check (no auth)
-- /health/ping/    -> protected ping (requires JWT)
-- /profile/        -> authenticated user profile (GET, PATCH, DELETE)
+- /api/signup/   -> public account creation with GDPR data
+- /api/profile/  -> authenticated profile read/update/delete
+
+Technical endpoints such as health checks and ping are intentionally routed
+from the project-level URL configuration instead of being mixed here.
 """
 
 from django.urls import path
-from .views import HealthView, ProtectedPingView, UserProfileView
+
+from .views import SignUpView, UserProfileView
 
 urlpatterns = [
-    path("", HealthView.as_view(), name="health"),
-    path("ping/", ProtectedPingView.as_view(), name="protected-ping"),
+    path("signup/", SignUpView.as_view(), name="sign-up"),
     path("profile/", UserProfileView.as_view(), name="user-profile"),
 ]
