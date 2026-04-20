@@ -1,5 +1,3 @@
-
-
 """Domain models for SoftDesk Support.
 
 This module defines the core business entities required by the bug-tracking API.
@@ -23,7 +21,7 @@ class Project(models.Model):
 
     Notes
     -----
-    - Will contain: name, description, type (backend/frontend/iOS/Android),
+    - Contains: name, description, type (backend/frontend/iOS/Android),
       author (FK to user), created_time (auto timestamp).
     - Only contributors of a project can read its details; only the author can
       update/delete it (authorization rules enforced at the view/permission layer).
@@ -59,7 +57,7 @@ class Contributor(models.Model):
 
     Notes
     -----
-    - Will contain: user (FK to AUTH_USER_MODEL), project (FK to Project),
+    - Contains: user (FK to AUTH_USER_MODEL), project (FK to Project),
       optional role if needed later (e.g., author/maintainer).
     - Used by permissions to restrict visibility and actions to project members.
     """
@@ -93,7 +91,7 @@ class Issue(models.Model):
 
     Notes
     -----
-    - Will contain: title, description, priority (LOW/MEDIUM/HIGH),
+    - Contains: title, description, priority (LOW/MEDIUM/HIGH),
       tag (BUG/FEATURE/TASK), status (TO_DO/IN_PROGRESS/FINISHED),
       assignee (FK to user, must be a contributor of the same project),
       project (FK), author (FK), created_time (auto timestamp).
@@ -157,7 +155,7 @@ class Comment(models.Model):
 
     Notes
     -----
-    - Will contain: uuid (auto), description (text), issue (FK),
+    - Contains: uuid (auto), description (text), issue (FK),
       author (FK to user), created_time (auto timestamp).
     - Visible to project contributors; update/delete restricted to the author.
     """

@@ -1,6 +1,4 @@
-
-
-"""Serializers for Projects and Issues."""
+"""Serializers for projects, contributors, issues and comments."""
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -98,6 +96,7 @@ class ContributorSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "project"]
 
     def validate(self, attrs):
+        """Ensure the user is not already a contributor of the project."""
         project = self.context["project"]
         user = attrs["user"]
 
@@ -114,7 +113,10 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """
-    Serializer for Comment model
+    Serialize Comment instances nested under an issue.
+
+    - `author` is read-only (request user).
+    - `issue` is read-only and injected from the URL (context).
     """
 
     author = serializers.ReadOnlyField(source="author.username")

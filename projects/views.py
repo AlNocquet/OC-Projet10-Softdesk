@@ -1,6 +1,4 @@
-
-
-"""ViewSets for the project domain (Projects and Issues)."""
+"""ViewSets for the project domain: projects, contributors, issues and comments."""
 
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
@@ -11,10 +9,15 @@ from .permissions import IsAuthorOrReadOnly
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    """CRUD for projects.
+    """
+    CRUD for projects.
 
-    Visibility: only projects where the requester is a contributor.
-    Write: object-level write restricted to the project author (permission).
+    Visibility:
+    - Authenticated users only.
+    - Users can only see projects where they are contributors.
+
+    Write permissions:
+    - Only the project author can update or delete a project.
     """
 
     serializer_class = ProjectSerializer
@@ -33,10 +36,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
 class IssueViewSet(viewsets.ModelViewSet):
-    """CRUD for issues nested under a project.
+    """
+    CRUD for issues nested under a project.
 
-    Visibility: contributors of the project only.
-    Write: object-level write restricted to the issue author (permission).
+    Visibility:
+    - Only contributors of the parent project can access its issues.
+
+    Write permissions:
+    - Only the issue author can update or delete an issue.
     """
     
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
@@ -70,10 +77,12 @@ class IssueViewSet(viewsets.ModelViewSet):
 
 class ContributorViewSet(viewsets.ModelViewSet):
     """
-    Manage contributors for a specific project.
+    Manage contributors of a project.
 
-    Rules:
-    - Any contributor of the project can list contributors.
+    Visibility:
+    - Only contributors of the project can access this endpoint.
+
+    Write permissions:
     - Only the project author can add or remove contributors.
     """
 
@@ -132,23 +141,32 @@ class ContributorViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """
-    Manage comments for a specific issue
+    CRUD for comments nested under an issue.
+
+    Visibility:
+    - Only contributors of the parent project can access its comments.
+
+    Write permissions:
+    - Only the comment author can update or delete a comment.
     """
 
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
     def _get_issue(self):
+        """Fetch the issue from the URL and ensure the current user belongs to its project."""
         return get_object_or_404(
             Issue.objects.filter(project__contributors__user=self.request.user),
             pk=self.kwargs["issue_id"]
         )
 
     def get_queryset(self):
+        """Return comments attached to the current issue only."""
         issue = self._get_issue()
         return Comment.objects.filter(issue=issue)
 
     def get_serializer_context(self):
+        """Inject the current issue into the serializer context."""
         context = super().get_serializer_context()
         context["issue"] = self._get_issue()
         return context
