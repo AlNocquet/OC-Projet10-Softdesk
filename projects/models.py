@@ -58,7 +58,7 @@ class Contributor(models.Model):
     Notes
     -----
     - Contains: user (FK to AUTH_USER_MODEL), project (FK to Project),
-      optional role if needed later (e.g., author/maintainer).
+      author (FK to user who added the contributor), created_time (auto timestamp).
     - Used by permissions to restrict visibility and actions to project members.
     """
 
@@ -72,6 +72,12 @@ class Contributor(models.Model):
         on_delete=models.CASCADE,
         related_name="contributors",
     )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="authored_contributions",
+    )
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return f"{self.user} -> {self.project.name}"

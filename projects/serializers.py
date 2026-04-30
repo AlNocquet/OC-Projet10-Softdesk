@@ -26,7 +26,11 @@ class ProjectSerializer(serializers.ModelSerializer):
         """Set creator as author AND auto-add as contributor."""
         user = self.context["request"].user
         project = Project.objects.create(author=user, **validated_data)
-        Contributor.objects.get_or_create(user=user, project=project)
+        Contributor.objects.get_or_create(
+            user=user,
+            project=project,
+            defaults={"author": user},
+        )
         return project
 
 
@@ -92,8 +96,8 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contributor
-        fields = ["id", "user", "project"]
-        read_only_fields = ["id", "project"]
+        fields = ["id", "user", "project", "author", "created_time"]
+        read_only_fields = ["id", "project", "author", "created_time"]
 
     def validate(self, attrs):
         """Ensure the user is not already a contributor of the project."""
@@ -107,8 +111,14 @@ class ContributorSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        """Create a contributor linked to the project and author from the request."""
         project = self.context["project"]
-        return Contributor.objects.create(project=project, **validated_data)
+        request = self.context["request"]
+        return Contributor.objects.create(
+            project=project,
+            author=request.user,
+            **validated_data
+        )
 
 
 class CommentSerializer(serializers.ModelSerializer):
