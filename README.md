@@ -37,7 +37,6 @@ Authentication relies on **JWT**, permissions are enforced at both authenticatio
 - Django 4.2+
 - Django REST Framework
 - djangorestframework-simplejwt
-- django-filter
 - SQLite (development)
 
 ## Installation
@@ -91,7 +90,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 /api/projects/{id}/                          GET, PATCH, DELETE
 
 /api/projects/{id}/contributors/             GET, POST
-/api/projects/{id}/contributors/{id}/        DELETE
+/api/projects/{project_id}/contributors/{contributor_id}/        DELETE
 
 /api/projects/{project_id}/issues/           GET, POST
 /api/projects/{project_id}/issues/{id}/      GET, PATCH, DELETE
