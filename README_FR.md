@@ -52,6 +52,18 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+## Variables d’environnement
+
+Créer un fichier `.env` à la racine du projet à partir du fichier `.env.example`.
+
+Exemple :
+
+```env
+SECRET_KEY=your_secret_key_here
+DEBUG=True
+```
+
+
 Vérification rapide :
 GET http://127.0.0.1:8000/health/
 

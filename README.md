@@ -52,6 +52,17 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+## Environment Variables
+
+Create a `.env` file at the project root based on `.env.example`.
+
+Example:
+
+```env
+SECRET_KEY=your_secret_key_here
+DEBUG=True
+```
+
 Health check:
 GET http://127.0.0.1:8000/health/
 
