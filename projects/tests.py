@@ -14,12 +14,12 @@ class ProjectContributorIssueCommentTests(APITestCase):
             username="Alice",
             password="admin0777"
         )
-        self.olivier = User.objects.create_user(
-            username="Olivier",
+        self.test_user = User.objects.create_user(
+            username="Test_user",
             password="admin0777"
         )
-        self.test3 = User.objects.create_user(
-            username="Test_3",
+        self.candidate = User.objects.create_user(
+            username="Candidate",
             password="admin0777"
         )
 
@@ -31,7 +31,12 @@ class ProjectContributorIssueCommentTests(APITestCase):
             type="BACK_END",
             author=self.alice,
         )
-        Contributor.objects.create(user=self.alice, project=self.project)
+
+        Contributor.objects.create(
+            user=self.alice,
+            project=self.project,
+            author=self.alice,
+        )
 
     def test_project_author_is_auto_added_as_contributor_on_create(self):
         payload = {
@@ -53,11 +58,15 @@ class ProjectContributorIssueCommentTests(APITestCase):
         )
 
     def test_only_project_author_can_add_contributor(self):
-        Contributor.objects.create(user=self.olivier, project=self.project)
+        Contributor.objects.create(
+            user=self.test_user,
+            project=self.project,
+            author=self.alice,
+        )
 
-        self.client.force_authenticate(user=self.olivier)
+        self.client.force_authenticate(user=self.test_user)
 
-        payload = {"user": "Test_3"}
+        payload = {"user": "Candidate"}
         response = self.client.post(
             f"/api/projects/{self.project.id}/contributors/",
             payload,
@@ -67,7 +76,7 @@ class ProjectContributorIssueCommentTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_project_author_can_add_contributor(self):
-        payload = {"user": "Olivier"}
+        payload = {"user": "Test_user"}
 
         response = self.client.post(
             f"/api/projects/{self.project.id}/contributors/",
@@ -78,15 +87,19 @@ class ProjectContributorIssueCommentTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
             Contributor.objects.filter(
-                user=self.olivier,
+                user=self.test_user,
                 project=self.project
             ).exists()
         )
 
     def test_duplicate_contributor_is_rejected(self):
-        Contributor.objects.create(user=self.olivier, project=self.project)
+        Contributor.objects.create(
+            user=self.test_user,
+            project=self.project,
+            author=self.alice,
+        )
 
-        payload = {"user": "Olivier"}
+        payload = {"user": "Test_user"}
 
         response = self.client.post(
             f"/api/projects/{self.project.id}/contributors/",
@@ -104,7 +117,7 @@ class ProjectContributorIssueCommentTests(APITestCase):
             "priority": "HIGH",
             "tag": "BUG",
             "status": "TO_DO",
-            "assignee": "Olivier",
+            "assignee": "Test_user",
         }
 
         response = self.client.post(
@@ -117,7 +130,11 @@ class ProjectContributorIssueCommentTests(APITestCase):
         self.assertIn("assignee", response.data)
 
     def test_comment_author_only_can_update_comment(self):
-        Contributor.objects.create(user=self.olivier, project=self.project)
+        Contributor.objects.create(
+            user=self.test_user,
+            project=self.project,
+            author=self.alice,
+        )
 
         issue = Issue.objects.create(
             title="Issue 1",
@@ -135,7 +152,7 @@ class ProjectContributorIssueCommentTests(APITestCase):
             author=self.alice,
         )
 
-        self.client.force_authenticate(user=self.olivier)
+        self.client.force_authenticate(user=self.test_user)
 
         response = self.client.patch(
             f"/api/projects/{self.project.id}/issues/{issue.id}/comments/{comment.id}/",

@@ -15,6 +15,13 @@ class CoreAndGdprTests(APITestCase):
             password="admin0777"
         )
 
+        UserProfile.objects.create(
+            user=self.user,
+            age=20,
+            can_be_contacted=True,
+            can_data_be_shared=False,
+        )
+
     def test_health_endpoint_is_public(self):
         response = self.client.get("/health/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -35,13 +42,6 @@ class CoreAndGdprTests(APITestCase):
     def test_profile_age_must_be_at_least_15(self):
         self.client.force_authenticate(user=self.user)
 
-        UserProfile.objects.create(
-            user=self.user,
-            age=20,
-            can_be_contacted=False,
-            can_data_be_shared=False,
-        )
-
         response = self.client.patch(
             "/api/profile/",
             {"age": 14},
@@ -53,13 +53,6 @@ class CoreAndGdprTests(APITestCase):
 
     def test_profile_delete_removes_user_account(self):
         self.client.force_authenticate(user=self.user)
-
-        UserProfile.objects.create(
-            user=self.user,
-            age=20,
-            can_be_contacted=True,
-            can_data_be_shared=False,
-        )
 
         response = self.client.delete("/api/profile/")
 
