@@ -97,7 +97,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 /api/projects/{project_id}/issues/{id}/      GET, PATCH, DELETE
 
 /api/projects/{project_id}/issues/{issue_id}/comments/        GET, POST
-/api/projects/{project_id}/issues/{issue_id}/comments/{id}/   PATCH, DELETE
+/api/projects/{project_id}/issues/{issue_id}/comments/{id}/   GET, PATCH, DELETE
 
 /api/profile/                                GET, PATCH, DELETE
 
