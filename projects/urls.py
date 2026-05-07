@@ -21,6 +21,7 @@ contributor_detail = ContributorViewSet.as_view({"delete": "destroy"})
 
 comment_list = CommentViewSet.as_view({"get": "list", "post": "create"})
 comment_detail = CommentViewSet.as_view({
+    "get": "retrieve",
     "patch": "partial_update",
     "delete": "destroy"
 })
